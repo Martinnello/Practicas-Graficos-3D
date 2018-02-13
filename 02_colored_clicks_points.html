@@ -34,8 +34,7 @@
         glProgram = null,
         fragmentShader = null,
         vertexShader = null;
-        var vertexPositionAttribute = null,
-        mouseClickPointsBuffer = null;
+        var vertexPositionAttribute = null;
         var mouseClickPoints = [];
 
         function initWebGL()
@@ -148,7 +147,6 @@
                 … // drawArrays
 
 			// Aquí viene el código para dibujar
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mouseClickPoints), gl.STATIC_DRAW);
             gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
             gl.drawArrays(gl.POINTS, 0, (mouseClickPoints.length/3));
 		}
