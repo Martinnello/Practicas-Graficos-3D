@@ -7,10 +7,9 @@
         {
             background-color: grey;
         }
-
         canvas 
         {
-            background-color: white;
+            background-color: black;
         }
     </style>
     <script id="shader-vs" type="x-shader/x-vertex">
@@ -22,23 +21,25 @@
         }
     </script>
     <script id="shader-fs" type="x-shader/x-fragment">
+        precision mediump float;
+        uniform vec4 uFragColor;
         void main(void) 
         {
-        	gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        	gl_FragColor = uFragColor;
         }
     </script>
     <script>
-
         var gl = null,
         canvas = null,
         glProgram = null,
         fragmentShader = null,
         vertexShader = null;
         var vertexPositionAttribute = null;
+        var fragColorAttribute = null;
         var mouseClickPoints = [];
+        var mouseClickColors = [];
 
         function initWebGL()
-
         {
             canvas = document.getElementById("my-canvas");
             try {
@@ -49,24 +50,20 @@
             if (gl) {
                 setupWebGL();
                 initShaders();
-                registerEventHandler();
-                click();
-                
+                registerEventHandler();     
             } else {
                 alert("Error: Your browser does not appear to support WebGL.");
             }
         }
 
         function setupWebGL()
-
         {
             //set the clear color to a shade of green
-            gl.clearColor(1.0, 1.0, 1.0, 1.0);
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
             gl.clear(gl.COLOR_BUFFER_BIT);
         }
         
         function initShaders() 
-
         {
             //get shader source
             var fs_source = document.getElementById('shader-fs').innerHTML,
@@ -88,7 +85,6 @@
         }
 
         function makeShader(src, type) 
-
         {
             //compile the vertex shader
             var shader = gl.createShader(type);
@@ -102,11 +98,11 @@
         }
 
         function registerEventHandler()
-        	// Register function (event handler) to be called on a mouse press
         {
+            // Register function (event handler) to be called on a mouse press
         	vertexPositionAttribute = gl.getAttribLocation(glProgram, "aVertexPosition");
-        	gl.enableVertexAttribArray(vertexPositionAttribute);
-        	canvas.onmousedown = function(ev){click(ev,gl,canvas,vertexPositionAttribute);};
+            fragColorAttribute = gl.getUniformLocation(glProgram, "uFragColor");
+        	canvas.onmousedown = function(ev){click(ev,gl,canvas,vertexPositionAttribute,fragColorAttribute);};
 		}
 
         function click(ev, gl, canvas, vertexPositionAttribute) 
@@ -120,9 +116,7 @@
 			y = (canvas.width/2 - (y - rect.top))/(canvas.width/2);
 
 			// Store the coordinates
-			mouseClickPoints.push(x);
-			mouseClickPoints.push(y);
-			mouseClickPoints.push(z);
+			mouseClickPoints.push([x,y,z]);
 
             // Store the color
             if(x >= 0.0 && y >= 0.0) { // First quadrant
@@ -140,21 +134,18 @@
                 var xy = mouseClickPoints[i];
                 var rgba = mouseClickColors[i];
                 // Pass the position of a point to aPosition variable
-                … // atribbute gl.vertexAttrb3f
+                gl.vertexAttrib3f(vertexPositionAttribute,xy[0],xy[1],xy[2]);
                 // Pass the color of a point to uFragColor variable
-                … // uniform
+                gl.uniform4f(fragColorAttribute,rgba[0],rgba[1],rgba[2],rgba[3]);
                 // Draw
-                … // drawArrays
-
-			// Aquí viene el código para dibujar
-            gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.POINTS, 0, (mouseClickPoints.length/3));
+                gl.drawArrays(gl.POINTS, 0, 1);
+            }
 		}
-
     </script>
+
 </head>
 <body onload="initWebGL()">
-    <canvas id="my-canvas" width="400" height="400">
+    <canvas id="my-canvas" width="500" height="500">
         Your browser does not support the HTML5 canvas element.
     </canvas>
 </body>
